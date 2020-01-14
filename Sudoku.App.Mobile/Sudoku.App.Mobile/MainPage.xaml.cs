@@ -25,12 +25,13 @@ namespace Sudoku.App.Mobile
 
             this.BindingContext = vm;
 
-            
+            Frame boxFrame;
             for (int i = 0; i < 9; ++i)
             {
                 SudokuGrid.ColumnDefinitions.Add(new ColumnDefinition());
                 SudokuGrid.RowDefinitions.Add(new RowDefinition());
 
+                // row error background
                 border = new BoxView
                 {
                     BackgroundColor = Color.Red.MultiplyAlpha(0.3),
@@ -46,6 +47,8 @@ namespace Sudoku.App.Mobile
                      Converter = InvertBoolConverter.Instance
                 });
 
+
+                // column error background
                 border = new BoxView
                 {
                     BackgroundColor = Color.Red.MultiplyAlpha(0.3),
@@ -61,7 +64,7 @@ namespace Sudoku.App.Mobile
                     Converter = InvertBoolConverter.Instance
                 });
 
-
+                // box error background
                 border = new BoxView
                 {
                     BackgroundColor = Color.Red.MultiplyAlpha(0.3),
@@ -79,6 +82,21 @@ namespace Sudoku.App.Mobile
                     Path = $"IsValid",
                     Converter = InvertBoolConverter.Instance
                 });
+
+
+                // box borders
+                boxFrame = new Frame
+                {
+                    BorderColor = Color.Black,
+                    CornerRadius = 0,
+                    Margin = new Thickness(0)
+                };
+
+                SudokuGrid.Children.Add(boxFrame);
+                Grid.SetRowSpan(boxFrame, 3);
+                Grid.SetColumnSpan(boxFrame, 3);
+                Grid.SetRow(boxFrame, (i / 3) * 3);
+                Grid.SetColumn(boxFrame, (i % 3) * 3);
             }
 
             for (int r = 0; r < 9; ++r)
@@ -90,7 +108,8 @@ namespace Sudoku.App.Mobile
                         Margin = new Thickness(5),
                         Keyboard = Keyboard.Numeric,
                         BackgroundColor = Color.White.MultiplyAlpha(0.8),
-                        BindingContext = vm.Sudoku[r].Cells[c]
+                        BindingContext = vm.Sudoku[r].Cells[c],
+                        HorizontalTextAlignment = TextAlignment.Center,
                     };
 
                     SudokuGrid.Children.Add(tb);

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -163,9 +161,20 @@ namespace Sudoku
         {
             for (int i = 0; i < 9; ++i)
             {
-                Rows[i] = new CellGroup();
-                Columns[i] = new CellGroup();
-                Boxes[i] = new CellGroup();
+                Rows[i] = new CellGroup()
+                {
+                    Index = i
+                };
+
+                Columns[i] = new CellGroup()
+                {
+                    Index = i
+                };
+
+                Boxes[i] = new CellGroup()
+                {
+                    Index = i
+                };
             }
 
             int boxIndex;
@@ -179,7 +188,11 @@ namespace Sudoku
                     boxGroupIndex = ((column % 3) * 3) + (row % 3);
 
                     cell = new Cell();
-                    
+
+                    cell.ColumnIndex = column;
+                    cell.RowIndex = row;
+                    cell.BoxIndex = boxIndex;
+
                     Rows[row].Cells[column] = cell;
                     Columns[column].Cells[row] = cell;
                     Boxes[boxIndex].Cells[boxGroupIndex] = cell;
@@ -187,7 +200,7 @@ namespace Sudoku
                     cell.Row = Rows[row];
                     cell.Column = Columns[column];
                     cell.Box = Boxes[boxIndex];
-                    
+
                     cell.Value = values[row * 9 + column];
                 }
             }
@@ -200,112 +213,6 @@ namespace Sudoku
         public CellGroup this[int row]
         {
             get => this.Rows[row];
-        }
-    }
-    public class Cell : INotifyPropertyChanged
-    {
-        private int? _value;
-
-        public int? Value
-        {
-            get => _value;
-            set
-            {
-                _value = value;
-                Box.UpdateIsValid();
-                Row.UpdateIsValid();
-                Column.UpdateIsValid();
-                OnPropertyChanged();
-            }
-        }
-
-        public CellGroup Row { get; internal set; }
-
-        public CellGroup Column { get; internal set; }
-
-        public CellGroup Box { get; internal set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        public HashSet<int> GetCandidates()
-        {
-            HashSet<int> candidates = new HashSet<int>(Enumerable.Range(1, 9));
-
-            if (Value.HasValue)
-                candidates.Remove(Value.Value);
-
-            foreach (var val in Box.Cells.Where(c => c.Value.HasValue).Select(c => c.Value.Value))
-            {
-                candidates.Remove(val);
-            }
-
-            foreach (var val in Row.Cells.Where(c => c.Value.HasValue).Select(c => c.Value.Value))
-            {
-                candidates.Remove(val);
-            }
-
-            foreach (var val in Column.Cells.Where(c => c.Value.HasValue).Select(c => c.Value.Value))
-            {
-                candidates.Remove(val);
-            }
-
-            return candidates;
-        }
-    }
-
-    public class CellGroup : INotifyPropertyChanged
-    {
-        public Cell[] Cells { get; } = new Cell[9];
-
-        public int? this[int index]
-        {
-            get => this.Cells[index].Value;
-            set => this.Cells[index].Value = value;
-        }
-
-        private bool _isValid = true;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public bool IsValid
-        {
-            get => _isValid;
-            private set
-            {
-                _isValid = value;
-                OnPropertyChanged();
-            }
-        }
-
-        protected virtual void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        internal void UpdateIsValid()
-        {
-            HashSet<int> enteredValues = new HashSet<int>();
-
-            for (int i = 0; i < Cells.Length; ++i)
-            {
-                if (Cells[i]?.Value.HasValue == true)
-                {
-                    if (enteredValues.Contains(Cells[i].Value.Value))
-                    {
-                        IsValid = false;
-                        return;
-                    }
-
-                    enteredValues.Add(Cells[i].Value.Value);
-                }
-            }
-
-            IsValid = true;
         }
     }
 }

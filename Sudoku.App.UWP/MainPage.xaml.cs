@@ -96,5 +96,6 @@ namespace Sudoku.App.UWP
             }
         }
 
+        public Sudoku Puzzle { get; }
     }
 }
