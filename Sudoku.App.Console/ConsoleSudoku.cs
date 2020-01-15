@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using c = System.Console;
 
 namespace Sudoku.App.Console
@@ -19,14 +21,24 @@ namespace Sudoku.App.Console
         const char space = ' ';
         const char tab = '\t';
 
-        public Sudoku Sudoku { get; }
+        public Sudoku Sudoku { get; private set; }
 
+
+        void NewPuzzle()
+        {
+            int row = this.SelectedCell.RowIndex, col = this.SelectedCell.ColumnIndex;
+
+            this.Sudoku = Sudoku.NewPuzzle();
+
+            this.SelectedCell = this.Sudoku.Rows[row].Cells[col];
+        }
 
         public Cell SelectedCell { get; private set; }
+        public bool IsSolving { get => _isSolving; set => _isSolving = value; }
 
         public ConsoleSudoku()
         {
-            this.Sudoku = new Sudoku();
+            this.Sudoku = Sudoku.NewPuzzle();
 
             this.SelectedCell = Sudoku.Rows[0].Cells[0];
         }
@@ -168,7 +180,7 @@ namespace Sudoku.App.Console
                     else
                     {
                         c.BackgroundColor = System.ConsoleColor.Black;
-                        c.ForegroundColor = System.ConsoleColor.White;
+                        c.ForegroundColor = cell.IsClue ? System.ConsoleColor.DarkGray : System.ConsoleColor.White;
                     }
 
                     switch (dings)
@@ -284,12 +296,12 @@ namespace Sudoku.App.Console
                     return;
                 case 'S':
                 case 's':
-
+                    await SolvePuzzleAsync();
                     break;
 
                 case 'N':
                 case 'n':
-
+                    NewPuzzle();
                     break;
             }
 
@@ -315,6 +327,34 @@ namespace Sudoku.App.Console
 
             DrawBoard();
             await GetInputAsync();
+        }
+
+        private bool _isSolving;
+
+        private async Task SolvePuzzleAsync()
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+
+            var solution = await this.Sudoku.GetSolutionAsync(cancellationTokenSource.Token);
+
+            
+
+            if (solution != null)
+            {
+//                int row = this.SelectedCell.RowIndex, col = this.SelectedCell.ColumnIndex;
+
+
+                for(int row = 0; row < 9; ++row)
+                {
+                    for(int col = 0; col < 0; ++col)
+                    {
+                        this.Sudoku[row][col] = solution[row][col];
+                    }
+                }
+
+
+                //this.SelectedCell = this.Sudoku.Rows[row].Cells[col];
+            }
         }
     }
 }

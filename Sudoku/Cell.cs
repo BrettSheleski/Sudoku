@@ -8,6 +8,7 @@ namespace Sudoku
     public class Cell : Observable
     {
         private int? _value;
+        private bool isClue;
 
         public int? Value
         {
@@ -57,5 +58,6 @@ namespace Sudoku
         public int RowIndex { get; internal set; }
         public int ColumnIndex { get; internal set; }
         public int BoxIndex { get; internal set; }
+        public bool IsClue { get => isClue; internal set => Set(ref isClue, value); }
     }
 }

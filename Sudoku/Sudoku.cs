@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -213,6 +214,37 @@ namespace Sudoku
         public CellGroup this[int row]
         {
             get => this.Rows[row];
+        }
+
+        public static Sudoku NewPuzzle() => NewPuzzle(17);
+
+        public static Sudoku NewPuzzle(int clues)
+        {
+            Sudoku s = new Sudoku();
+
+            Random random = new Random((int)DateTime.Now.Ticks);
+
+            Cell cell;
+            HashSet<int> availableNumbers;
+
+            while (clues > 0)
+            {
+                cell = s.Rows[random.Next(9)].Cells[random.Next(9)];
+
+                if (!cell.Value.HasValue)
+                {
+                    availableNumbers = cell.GetCandidates();
+
+                    if (availableNumbers.Count > 0)
+                    {
+                        cell.Value = availableNumbers.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+                        cell.IsClue = true;
+                        --clues;
+                    }
+                }
+            }
+
+            return s;
         }
     }
 }
